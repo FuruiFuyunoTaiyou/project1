@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-void print_args(char ** arguments){
+void print_args(char ** arguments){ //printing extra space?
   int i = 0;
   printf("printing args: [ \n");
   while(arguments[i]){ 
@@ -27,6 +27,11 @@ char ** parse_args(char * line){ //needs to be modified
 }
 
 int shell(){
+  char input[1000];
+  fgets(input, sizeof(input), stdin);
+  printf("input: %s \n", input);
+  char ** args = parse_args(input);
+  print_args(args);
   
   return 0;
 }
