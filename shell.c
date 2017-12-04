@@ -103,6 +103,7 @@ int has_redirect_stdin(char ** args){
   return 0;
 }
 
+/*
 int redirect_stdin(char * path){ //return value is the reference to stdin param filename?
   int fd_stdin = 0;
   int fd_stdin_new = dup(fd_stdin);
@@ -115,6 +116,7 @@ void unredirect_stdin(int fd_stdin_new){
   dup2(fd_stdin_new, 0);
   close(fd_stdin_new); //and also close the other file?
 }
+*/
 
 int exec_cmd(char ** args){ //if that cmd is supposed to result in an exit, return 0. Otherwise, return 1
   int child_pid;
@@ -128,11 +130,13 @@ int exec_cmd(char ** args){ //if that cmd is supposed to result in an exit, retu
     new_fd_stdout = redirect_stdout(args[has_redirect_out]);
     args[has_redirect_out - 1] = NULL;
   }
-  if(has_redirect_in){ //ah, it's b/c we're not using stdin anymore? no, we are when executing the cmds
+  /*
+  if(has_redirect_in){ 
     //printf("redirecting in using element %d as path\n", has_redirect_in);
     new_fd_stdin = redirect_stdin(args[has_redirect_in]);
     args[has_redirect_in - 1] = NULL;
   }
+  */
   if(strcmp(args[0], "cd") == 0){
     chdir(args[1]);
   }else if(strcmp(args[0], "exit") == 0){
@@ -150,9 +154,11 @@ int exec_cmd(char ** args){ //if that cmd is supposed to result in an exit, retu
   if(has_redirect_out){
     unredirect_stdout(new_fd_stdout);
   }
+  /*
   if(has_redirect_in){
     unredirect_stdin(new_fd_stdin);
   }
+  */
   return 1;
 }
 
