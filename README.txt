@@ -7,13 +7,12 @@ Implemented:
     Can do simple redirection using >. 
     
 Unsuccessful:
-    Simple redirection using < does not work as intended.
+    Simple redirection using < does not work as intended. Commented out in shell.c
     Did not implement simple pipes.
     
 Known Bugs:
     Does not work if there is more than one whitespace character 
     next to an argument.
-    Redirecting stdin does not do anything but empty the file.
     
 Function Headers:
     /*********************************
