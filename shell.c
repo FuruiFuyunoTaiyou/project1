@@ -64,8 +64,45 @@ char ** parse_args(char * line){ //needs to be modified for more args?
   return args;
 }
 
+//checks for element/string ">"... and later, another one will check for <
+int has_redirect_stdout(char ** args){
+  int i = 0;
+  while(args[i]){ 
+    if(strcmp(args[i], ">") == 0){
+      return i + 1; //return index of path if redirecting
+    }
+    i++;
+  }
+  return 0;
+}
+
+//if ">" existent, rearrange files, execute, rearrange back to normal. BTW, if this helps, exit & cd don't really have outputs... I don't think.
+//Assuming this will be in exec_cmd
+int redirect_stdout(char * path){ //return value is the reference to stdout. param filename?
+  //gotta open file for fd?
+  int fd_stdout = 1;
+  int fd_stdout_new = dup(fd_stdout);
+  int fd_file = open(path, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+  dup2(fd_file, fd_stdout);
+  return fd_stdout_new;
+}
+
+void unredirect_stdout(int fd_stdout_new){
+  dup2(fd_stdout_new, 1);
+  close(fd_stdout_new); //and also close the other file?
+}
+
+
 int exec_cmd(char ** args){ //if that cmd is supposed to result in an exit, return 0. Otherwise, return 1
   int child_pid;
+  int has_redirect_out = has_redirect_stdout(args);
+  int new_fd_stdout;
+  //int fd_file;
+  if(has_redirect_out){ //remember to cut off that section of args
+    //redirect & save the ref!
+    new_fd_stdout = redirect_stdout(args[has_redirect_out]);
+    args[has_redirect_out - 1] = NULL;
+  }
   if(strcmp(args[0], "cd") == 0){
     chdir(args[1]);
   }else if(strcmp(args[0], "exit") == 0){
@@ -79,6 +116,10 @@ int exec_cmd(char ** args){ //if that cmd is supposed to result in an exit, retu
       return 0; //in case
     }
   }
+  //un-redirect!
+  if(has_redirect_out){
+    unredirect_stdout(new_fd_stdout);
+  }
   return 1;
 }
 
@@ -87,7 +128,7 @@ int exec_cmds(char ** cmds){ //return 0 if exit. Otherwise, continue and return 
   char ** args;
   //int child_pid;
   while(cmds[i]){ //get & execute first full cmd
-    args = parse_args(cmds[i]); //be careful, some of the commands will start a/o  with a space, so strsep may make the first arg an empty string and have an empty string as the last arg
+    args = parse_args(cmds[i]); 
     //testing
     print_args(args);
     if(exec_cmd(args) == 0){ //if that cmd is supposed to result in an exit (0), then exit. Otherwise, continue
@@ -103,7 +144,7 @@ int shell(){
   char input[1000];
   char ** cmds;
   while(1){
-    printf("type command: ");
+    printf("type command(s): ");
     fgets(input, sizeof(input), stdin);
     //testing
     printf("input: %s \n", input);
@@ -118,7 +159,5 @@ int shell(){
 }
 
 int main(){
-  shell();
-  
-  return 0;
+  return shell();
 }
