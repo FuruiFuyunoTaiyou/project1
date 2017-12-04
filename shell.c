@@ -13,7 +13,19 @@ void print_args(char ** arguments){
   }
   printf("] \n");
 }
-
+/*
+char * strsep_mod(char ** original_stringp, const char * delim){
+  char ** old_stringp = original_stringp;
+  char * delim_location = strstr(*original_stringp, delim);
+  if(delim_location){
+    *delim_location = NULL;
+    *original_stringp = delim_location + strlen(delim);
+  }else{
+    *original_stringp = NULL;
+  }
+  return *old_stringp;
+}
+*/
 char ** parse_cmds(char * input){
   char * newline = strchr(input, '\n'); //removing works, but warning.
   if(newline){
@@ -23,7 +35,10 @@ char ** parse_cmds(char * input){
   char ** cmds = calloc(6, sizeof(char *));
   int i = 0;
   while(i < 5){
-    cmds[i] = strsep(&input, ";"); //didn't work as expected with delim " ; ", but at least spaces are not too detrimental for now.
+    //cmds[i] = strsep_mod(&input, ";"); //didn't work as expected with delim " ; "
+    //testing
+    //printf("cmds[%d]: %s", i, cmds[i]);
+    cmds[i] = strsep(&input, ";");
     i++;
   }
   cmds[i] = NULL;
@@ -31,14 +46,14 @@ char ** parse_cmds(char * input){
 }
 
 char ** parse_args(char * line){ //needs to be modified for more args?
-  //get rid of the possible \n
   char * s1 = line;
-
-  char * newline = strchr(s1, '\n'); 
-  if(newline){
-    *newline = NULL;
+  //cutting off possible spaces on ends
+  if(*s1 == ' '){
+    s1++;
   }
-
+  if(s1[strlen(s1) - 1] == ' '){
+    s1[strlen(s1) - 1] = NULL;
+  }
   char ** args = calloc(6, sizeof(char *));;
   int i = 0;
   while(i<5){
@@ -99,9 +114,6 @@ int shell(){
       return 0;
     }
   }
-  
-  
-  
   return 0;
 }
 
